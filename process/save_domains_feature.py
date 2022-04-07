@@ -3,7 +3,7 @@ from transformers import BertModel, BertTokenizer
 from tqdm import tqdm
 import joblib
 import numpy as np
-# 原始数据集路径
+# path
 data_dir = 'data/data'
 # word2vec
 ## load word2vec

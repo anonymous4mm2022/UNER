@@ -1,6 +1,6 @@
 # coding=utf-8
 """
-划分原始数据为train,dev,test
+split train,dev,test
 """
 import os
 import torch
@@ -58,20 +58,18 @@ words = list(set(words))
 # bert vec 
 from transformers import BertModel, BertTokenizer
 from tqdm import tqdm
-# 这里我们调用bert-base模型，同时模型的词典经过小写处理
 model_name = 'bert-base-uncased'
-# 读取模型对应的tokenizer
 tokenizer = BertTokenizer.from_pretrained(model_name)
 max_seq_len=15
-# 载入模型
+
 model = BertModel.from_pretrained(model_name)
 def bert_embeddings(word):
-    # 通过tokenizer把文本变成 token_id
+    
     word2token={}
 
     input_ids = tokenizer.encode(word, add_special_tokens=True)
     input_ids = torch.tensor([input_ids])
-    # 获得BERT模型最后一个隐层结果
+    
     with torch.no_grad():
         last_hidden_states = model(input_ids)[0]  # Models outputs are now tuples
         last_hidden_states = torch.squeeze(last_hidden_states,dim=0)

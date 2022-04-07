@@ -253,12 +253,7 @@ class CoAttention_ImageDNS(nn.Module):
         self.att_linear_2 = nn.Linear(args.hidden_dim * 2, 1)
 
     def forward(self, dns_feature, img_features):
-        """
-        :param text_features: (batch_size, max_seq_len, hidden_dim)
-        :param img_features: (batch_size, num_img_region, hidden_dim)
-        :return att_text_features (batch_size, max_seq_len, hidden_dim)
-                att_img_features (batch_size, max_seq_len, hidden_dim)
-        """
+        
         ############### 1. Word-guided visual attention ###############
         # 1.1. Repeat the vectors -> [batch_size, max_seq_len, num_img_region, hidden_dim]
         dns_features_rep = dns_feature.unsqueeze(2).repeat(1, 1, self.args.num_img_region, 1)
@@ -318,12 +313,7 @@ class CoAttention_TextImage(nn.Module):
         self.att_linear_2 = nn.Linear(args.hidden_dim * 2, 1)
 
     def forward(self, text_features, img_features):
-        """
-        :param text_features: (batch_size, max_seq_len, hidden_dim)
-        :param img_features: (batch_size, num_img_region, hidden_dim)
-        :return att_text_features (batch_size, max_seq_len, hidden_dim)
-                att_img_features (batch_size, max_seq_len, hidden_dim)
-        """
+        
         ############### 1. Word-guided visual attention ###############
         # 1.1. Repeat the vectors -> [batch_size, max_seq_len, num_img_region, hidden_dim]
         text_features_rep = text_features.unsqueeze(2).repeat(1, 1, self.args.num_img_region, 1)
@@ -382,12 +372,7 @@ class CoAttention_TextDNS(nn.Module):
         self.att_linear_2 = nn.Linear(args.hidden_dim * 2, 1)
 
     def forward(self, text_features, dns_features):
-        """
-        :param text_features: (batch_size, max_seq_len, hidden_dim)
-        :param img_features: (batch_size, num_img_region, hidden_dim)
-        :return att_text_features (batch_size, max_seq_len, hidden_dim)
-                att_img_features (batch_size, max_seq_len, hidden_dim)
-        """
+        
         ############### 1. Word-guided visual attention ###############
         # 1.1. Repeat the vectors -> [batch_size, max_seq_len, num_img_region, hidden_dim]
         text_features_rep = text_features.unsqueeze(2).repeat(1, 1, self.args.max_seq_len_dns, 1)
@@ -441,11 +426,7 @@ class GMF(nn.Module):
         self.gate_linear = nn.Linear(args.hidden_dim * 2, 1)
 
     def forward(self, att_text_features, att_img_features):
-        """
-        :param att_text_features: (batch_size, max_seq_len, hidden_dim)
-        :param att_img_features: (batch_size, max_seq_len, hidden_dim)
-        :return: multimodal_features
-        """
+        
         new_img_feat = torch.tanh(self.img_linear(att_img_features))  # [batch_size, max_seq_len, hidden_dim]
         new_text_feat = torch.tanh(self.text_linear(att_text_features))  # [batch_size, max_seq_len, hidden_dim]
         
@@ -466,11 +447,7 @@ class GMF1(nn.Module):
         self.gate_linear = nn.Linear(args.hidden_dim * 2, 1)
 
     def forward(self, att_text_features, att_img_features):
-        """
-        :param att_text_features: (batch_size, max_seq_len, hidden_dim)
-        :param att_img_features: (batch_size, max_seq_len, hidden_dim)
-        :return: multimodal_features
-        """
+        
         new_img_feat = torch.tanh(self.img_linear(att_img_features))  # [batch_size, max_seq_len, hidden_dim]
         new_text_feat = torch.tanh(self.text_linear(att_text_features))  # [batch_size, max_seq_len, hidden_dim]
 
@@ -493,16 +470,10 @@ class GMF2(nn.Module):
         self.gate_linear = nn.Linear(args.hidden_dim * 2, 1)
 
     def forward(self, att_text_features, att_dns_features):
-        """
-        :param att_text_features: (batch_size, max_seq_len, hidden_dim)
-        :param att_img_features: (batch_size, max_seq_len, hidden_dim)
-        :return: multimodal_features
-        """
+        
         new_dns_feat = torch.tanh(self.dns_linear(att_dns_features))  # [batch_size, max_seq_len, hidden_dim]
         new_text_feat = torch.tanh(self.text_linear(att_text_features))  # [batch_size, max_seq_len, hidden_dim]
 
-    
-        
         gate_dns = self.gate_linear(torch.cat([new_dns_feat, new_text_feat], dim=-1))  # [batch_size, max_seq_len, 1]
         gate_dns = torch.sigmoid(gate_dns)  # [batch_size, max_seq_len, 1]
         gate_dns = gate_dns.repeat(1, 1, self.args.hidden_dim)  # [batch_size, max_seq_len, hidden_dim]
@@ -567,11 +538,7 @@ class GMF4(nn.Module):
         self.gate_linear2 = nn.Linear(args.hidden_dim * 2, 1)
         self.gate_linear3 = nn.Linear(args.hidden_dim * 2, 1)
     def forward(self, att_text_features, att_img_features,att_dns_features):
-        """
-        :param att_text_features: (batch_size, max_seq_len, hidden_dim)
-        :param att_img_features: (batch_size, max_seq_len, hidden_dim)
-        :return: multimodal_features
-        """
+       
         new_img_feat = torch.tanh(self.img_linear(att_img_features))  # [batch_size, max_seq_len, hidden_dim]
         new_text_feat = torch.tanh(self.text_linear(att_text_features))  # [batch_size, max_seq_len, hidden_dim]
         new_dns_feat = torch.tanh(self.dns_linear(att_dns_features))  # [batch_size, max_seq_len, hidden_dim]
@@ -600,11 +567,7 @@ class GMF4(nn.Module):
         return multimodal_features
 
 class FiltrationGate(nn.Module):
-    """
-    In this part, code is implemented in other way compare to equation on paper.
-    So I mixed the method between paper and code (e.g. Add `nn.Linear` after the concatenated matrix)
-    """
-
+   
     def __init__(self, args):
         super(FiltrationGate, self).__init__()
         self.args = args
@@ -617,12 +580,7 @@ class FiltrationGate(nn.Module):
         self.output_linear = nn.Linear(args.hidden_dim * 2, len(WebsiteProcessor.get_labels()))
 
     def forward(self, text_features, multimodal_features):
-        """
-        :param text_features: Original text feature from BiLSTM [batch_size, max_seq_len, hidden_dim]
-        :param multimodal_features: Feature from GMF [batch_size, max_seq_len, hidden_dim]
-        :return: output: Will be the input for CRF decoder [batch_size, max_seq_len, hidden_dim]
-        """
-        # [batch_size, max_seq_len, 2 * hidden_dim]
+       
         concat_feat = torch.cat([self.text_linear(text_features), self.multimodal_linear(multimodal_features)], dim=-1)
         # This part is not written on equation, but if is needed
         filtration_gate = torch.sigmoid(self.gate_linear(concat_feat))  # [batch_size, max_seq_len, 1]
@@ -636,10 +594,6 @@ class FiltrationGate(nn.Module):
 
 
 class ACN(nn.Module):
-    """
-    ACN (Adaptive CoAttention Network)
-    CharCNN -> BiLSTM -> CoAttention -> GMF -> FiltrationGate -> CRF
-    """
 
     def __init__(self, args, pretrained_word_matrix=None):
         super(ACN, self).__init__()
@@ -655,14 +609,7 @@ class ACN(nn.Module):
         self.crf = CRF(num_tags=len(WebsiteProcessor.get_labels()), batch_first=True)
 
     def forward(self, word_ids, char_ids, img_feature, mask, label_ids):
-        """
-        :param word_ids: (batch_size, max_seq_len)
-        :param char_ids: (batch_size, max_seq_len, max_word_len)
-        :param img_feature: (batch_size, num_img_region(=49), img_feat_dim(=512))
-        :param mask: (batch_size, max_seq_len)
-        :param label_ids: (batch_size, max_seq_len)
-        :return:
-        """
+        
         text_features = self.lstm(word_ids, char_ids)
         img_features = self.dim_match(img_feature)  # [batch_size, num_img_region(=49), hidden_dim(=200)]
         assert text_features.size(-1) == img_features.size(-1)
@@ -680,10 +627,7 @@ class ACN(nn.Module):
 
 
 class ACN6(nn.Module):
-    """
-    ACN (Adaptive CoAttention Network)
-    Bert -> LSTM -> CoAttention -> GMF -> FiltrationGate -> CRF
-    """
+    
 
     def __init__(self, args):
         super(ACN6, self).__init__()
@@ -701,14 +645,7 @@ class ACN6(nn.Module):
         self.args = args
 
     def forward(self, img_feature, mask, label_ids,token_ids,token_length):
-        """
-        :param word_ids: (batch_size, max_seq_len)
-        :param char_ids: (batch_size, max_seq_len, max_word_len)
-        :param img_feature: (batch_size, num_img_region(=49), img_feat_dim(=512))
-        :param mask: (batch_size, max_seq_len)
-        :param label_ids: (batch_size, max_seq_len)
-        :return:
-        """
+        
         text_features = self.lstm(token_ids,token_length,self.args.max_seq_len)
         img_features = self.dim_match(img_feature)  # [batch_size, num_img_region(=49), hidden_dim(=200)]
         assert text_features.size(-1) == img_features.size(-1)
@@ -725,11 +662,7 @@ class ACN6(nn.Module):
         return loss, logits
 
 class ACN7(nn.Module):
-    """
-    ACN (Adaptive CoAttention Network)
-    CharCNN -> BiLSTM -> CoAttention -> GMF -> FiltrationGate -> CRF
-    """
-
+    
     def __init__(self, args, pretrained_word_matrix=None):
         super(ACN7, self).__init__()
         self.args = args
@@ -777,32 +710,16 @@ class ACN7(nn.Module):
         self.crf = CRF(num_tags=len(WebsiteProcessor.get_labels()), batch_first=True)
 
     def forward(self,  img_feature, mask, label_ids,dns_feature,token_ids,token_length,domain_token_ids,domain_token_length):
-        """
-        :param word_ids: (batch_size, max_seq_len)
-        :param char_ids: (batch_size, max_seq_len, max_word_len)
-        :param img_feature: (batch_size, num_img_region(=49), img_feat_dim(=512))
-        :param mask: (batch_size, max_seq_len)
-        :param label_ids: (batch_size, max_seq_len)
-        :return:
-        """
+        
         text_features = self.lstm1(token_ids,token_length,self.args.max_seq_len)
         img_features = self.dim_match(img_feature)  # [batch_size, num_img_region(=49), hidden_dim(=200)]
         dns_features = self.lstm2(domain_token_ids,domain_token_length,self.args.max_seq_len_dns)
 
         assert text_features.size(-1) == img_features.size(-1)
         assert text_features.size(-1) == dns_features.size(-1)
-        #
-        #print('text_features:',text_features.shape,text_features.size(-1))
-        #print('img_features:',img_features.shape,img_features.size(-1))
-        #att_text_features = self.text_transformer(text_features, mask=None)
+        
         att_img_features = self.img_transformer(img_features, mask=None)
 
-        #att_dns_features = self.dns_transformer(dns_features, mask=None)
-        #print('text_features1:',text_features.shape)
-        #print('img_features1:',img_features.shape)
-
-        #att_text_features_ = self.co_transformer1(att_text_features,att_img_features, mask=None)
-        #att_img_features_ = self.co_transformer2(img_features,text_features, mask=None)
 
         att_text_features1, att_img_features1 = self.co_attention(text_features, img_features)
         att_text_features2, att_dns_features1 = self.co_attention1(text_features, dns_features)
@@ -849,10 +766,6 @@ class ACN7(nn.Module):
 
 
 class ACN5(nn.Module):
-    """
-    ACN (Adaptive CoAttention Network)
-    CharCNN -> BiLSTM -> CoAttention -> GMF -> FiltrationGate -> CRF
-    """
 
     def __init__(self, args, pretrained_word_matrix=None):
         super(ACN5, self).__init__()
@@ -886,10 +799,6 @@ class ACN5(nn.Module):
 
 
 class ACN1(nn.Module):
-    """
-    ACN (Adaptive CoAttention Network)
-    CharCNN -> BiLSTM -> CoAttention -> GMF -> FiltrationGate -> CRF
-    """
 
     def __init__(self, args, pretrained_word_matrix=None):
         super(ACN1, self).__init__()
@@ -917,14 +826,7 @@ class ACN1(nn.Module):
         self.crf = CRF(num_tags=len(WebsiteProcessor.get_labels()), batch_first=True)
 
     def forward(self, word_ids, char_ids, img_feature, mask, label_ids):
-        """
-        :param word_ids: (batch_size, max_seq_len)
-        :param char_ids: (batch_size, max_seq_len, max_word_len)
-        :param img_feature: (batch_size, num_img_region(=49), img_feat_dim(=512))
-        :param mask: (batch_size, max_seq_len)
-        :param label_ids: (batch_size, max_seq_len)
-        :return:
-        """
+        
         text_features = self.lstm(word_ids, char_ids)
         img_features = self.dim_match(img_feature)  # [batch_size, num_img_region(=49), hidden_dim(=200)]
         assert text_features.size(-1) == img_features.size(-1)
@@ -958,11 +860,7 @@ class ACN1(nn.Module):
         return loss, logits
 
 class ACN2(nn.Module):
-    """
-    ACN (Adaptive CoAttention Network)
-    CharCNN -> BiLSTM -> CoAttention -> GMF -> FiltrationGate -> CRF
-    """
-
+    
     def __init__(self, args, pretrained_word_matrix=None):
         super(ACN2, self).__init__()
         self.lstm = BiLSTM(args, pretrained_word_matrix)
@@ -994,14 +892,7 @@ class ACN2(nn.Module):
         self.crf = CRF(num_tags=len(WebsiteProcessor.get_labels()), batch_first=True)
 
     def forward(self, word_ids, char_ids,  mask, label_ids,dns_feature):
-        """
-        :param word_ids: (batch_size, max_seq_len)
-        :param char_ids: (batch_size, max_seq_len, max_word_len)
-        :param img_feature: (batch_size, num_img_region(=49), img_feat_dim(=512))
-        :param mask: (batch_size, max_seq_len)
-        :param label_ids: (batch_size, max_seq_len)
-        :return:
-        """
+        
         text_features = self.lstm(word_ids, char_ids)
         dns_feature = self.dim_match_dns(dns_feature)
 
@@ -1042,11 +933,6 @@ class ACN2(nn.Module):
         return loss, logits
 
 class ACN3(nn.Module):
-    """
-    ACN (Adaptive CoAttention Network)
-    CharCNN -> BiLSTM -> CoAttention -> GMF -> FiltrationGate -> CRF
-    """
-
     def __init__(self, args, pretrained_word_matrix=None):
         super(ACN3, self).__init__()
         self.lstm = BiLSTM(args, pretrained_word_matrix)
@@ -1087,14 +973,6 @@ class ACN3(nn.Module):
         self.crf = CRF(num_tags=len(WebsiteProcessor.get_labels()), batch_first=True)
 
     def forward(self, word_ids, char_ids, img_feature, mask, label_ids,dns_feature):
-        """
-        :param word_ids: (batch_size, max_seq_len)
-        :param char_ids: (batch_size, max_seq_len, max_word_len)
-        :param img_feature: (batch_size, num_img_region(=49), img_feat_dim(=512))
-        :param mask: (batch_size, max_seq_len)
-        :param label_ids: (batch_size, max_seq_len)
-        :return:
-        """
         text_features = self.lstm(word_ids, char_ids)
         img_features = self.dim_match(img_feature)  # [batch_size, num_img_region(=49), hidden_dim(=200)]
         dns_feature = self.dim_match_dns(dns_feature)
@@ -1144,11 +1022,6 @@ class ACN3(nn.Module):
         return loss, logits
 
 class ACN4(nn.Module):
-    """
-    ACN (Adaptive CoAttention Network)
-    CharCNN -> BiLSTM -> CoAttention -> GMF -> FiltrationGate -> CRF
-    """
-
     def __init__(self, args, pretrained_word_matrix=None):
         super(ACN4, self).__init__()
         self.lstm = BiLSTM(args, pretrained_word_matrix)
@@ -1197,14 +1070,6 @@ class ACN4(nn.Module):
         self.crf = CRF(num_tags=len(WebsiteProcessor.get_labels()), batch_first=True)
 
     def forward(self, word_ids, char_ids, img_feature, mask, label_ids,dns_feature):
-        """
-        :param word_ids: (batch_size, max_seq_len)
-        :param char_ids: (batch_size, max_seq_len, max_word_len)
-        :param img_feature: (batch_size, num_img_region(=49), img_feat_dim(=512))
-        :param mask: (batch_size, max_seq_len)
-        :param label_ids: (batch_size, max_seq_len)
-        :return:
-        """
         text_features = self.lstm(word_ids, char_ids)
         img_features = self.dim_match(img_feature)  # [batch_size, num_img_region(=49), hidden_dim(=200)]
         dns_features = self.dim_match_dns(dns_feature)

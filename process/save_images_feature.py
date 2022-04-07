@@ -1,6 +1,6 @@
 #coding=utf-8
 """
-保存images的特征
+save images features
 """
 import torch
 

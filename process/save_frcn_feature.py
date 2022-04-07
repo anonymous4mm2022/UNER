@@ -18,9 +18,6 @@ from maskrcnn_benchmark.utils.model_serialization import load_state_dict
 from PIL import Image
 
 
-sys.path.append("/private/home/ronghanghu/workspace/vqa-maskrcnn-benchmark")  # NoQA
-
-
 def load_detection_model(yaml_file, yaml_ckpt):
     cfg.merge_from_file(yaml_file)
     cfg.freeze()

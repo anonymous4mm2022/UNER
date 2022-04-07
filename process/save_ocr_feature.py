@@ -6,12 +6,12 @@ import numpy as np
 import os
 IMAGE_DIR = 'data/data/imgs_np'
 
-# 读取图像路径
+# path
 img_lst_ = os.listdir(IMAGE_DIR)
 img_lst = ['{}/{}'.format(IMAGE_DIR,img) for img in img_lst_ if '.npy' in img]
 imgid_lst = [int(img.strip().split('.')[0]) for img in img_lst_ if '.npy' in img ]
 
-# 读取OCR结果
+# ocr
 from utils import get_ocr_texts
 texts = get_ocr_texts('data/data/imgs_ocr')
 
